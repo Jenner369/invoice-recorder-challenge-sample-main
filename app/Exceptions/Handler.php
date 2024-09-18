@@ -2,6 +2,7 @@
 
 namespace App\Exceptions;
 
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Throwable;
 
@@ -30,6 +31,15 @@ class Handler extends ExceptionHandler
 
     public function render($request, Throwable $e)
     {
+
+        if ($e instanceof ModelNotFoundException) {
+            return response()->json([
+                'error' => 'Recurso no encontrado',
+                'message' => 'El recurso solicitado no existe en la base de datos.',
+            ], 404);
+        }
+
+
         return response([
             'message' => $e->getMessage(),
         ], 500);

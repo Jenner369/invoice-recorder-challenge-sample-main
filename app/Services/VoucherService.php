@@ -19,9 +19,17 @@ class VoucherService
     ) {
     }
 
-    public function getVouchers(int $page, int $paginate): LengthAwarePaginator
+    public function getVouchers(int $page, int $paginate, User $user, array $filters): LengthAwarePaginator
     {
-        return Voucher::with(['lines', 'user'])->paginate(perPage: $paginate, page: $page);
+        $query = Voucher::query();
+
+        if ($filters['serie']) $query->bySeries($filters['serie']);
+        if ($filters['number']) $query->byNumber($filters['number']);
+        if ($filters['from']) $query->fromDate($filters['from']);
+        if ($filters['to']) $query->toDate($filters['to']);
+        $query->byUserId($user->id);
+
+        return $query->paginate(perPage: $paginate, page: $page);
     }
 
     public function getTotalAmountVouchers(string $currency, User $user): CurrencyTotalAmountDTO
@@ -94,6 +102,17 @@ class VoucherService
         return $voucher;
     }
 
+    public function deleteVoucher(string $voucherId, User $user): void
+    {
+        $voucher = Voucher::byUserId($user->id)->findOrFail($voucherId);
+        VoucherLine::where('voucher_id', $voucher->id)->delete();
+        $voucher->delete();
+    }
+
+    public function getVoucher(string $voucherId, User $user): Voucher
+    {
+        return Voucher::with(['lines', 'user'])->byUserId($user->id)->findOrFail($voucherId);
+    }
 
     /**
      * Process vouchers from files data and content, and return the processed vouchers, specified by the user.

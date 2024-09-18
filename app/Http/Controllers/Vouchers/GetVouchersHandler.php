@@ -15,9 +15,12 @@ class GetVouchersHandler
 
     public function __invoke(GetVouchersRequest $request): Response
     {
+        $user = auth()->user();
         $vouchers = $this->voucherService->getVouchers(
             $request->query('page'),
             $request->query('paginate'),
+            $user,
+            $request->getFilters(),
         );
 
         return response([

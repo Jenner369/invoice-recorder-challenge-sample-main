@@ -89,4 +89,24 @@ class Voucher extends Model
         return $query->where('user_id', $userId);
     }
 
+    public function scopeBySeries(Builder $query, string $series): Builder
+    {
+        return $query->where('series', $series);
+    }
+
+    public function scopeByNumber(Builder $query, string $number): Builder
+    {
+        return $query->where('number', $number);
+    }
+
+    public function scopeFromDate(Builder $query, Carbon $from): Builder
+    {
+        return $query->where('created_at', '>=', $from);
+    }
+
+    public function scopeToDate(Builder $query, Carbon $to): Builder
+    {
+        return $query->where('created_at', '<=', $to);
+    }
+
 }
