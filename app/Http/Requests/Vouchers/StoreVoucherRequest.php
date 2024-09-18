@@ -12,11 +12,11 @@ class StoreVoucherRequest extends FormRequest
             'files' => ['required', function ($attribute, $value, $fail) {
                 if (is_array($value)) return;
                 if (!$value instanceof \Illuminate\Http\UploadedFile) {
-                    $fail("$attribute must be a file or an array of files.");
+                    $fail("$attribute debe ser un archivo o un listado de archivos.");
                     return;
                 }
                 if ($value->getMimeType() !== 'text/xml') {
-                    $fail("$attribute must be an XML file.");
+                    $fail("$attribute debe ser un archivo XML.");
                 }
             }],
             'files.*' => ['file', 'mimes:xml'],
@@ -37,5 +37,14 @@ class StoreVoucherRequest extends FormRequest
             ];
         }
         return $vouchersForProcessing;
+    }
+
+    public function messages(): array
+    {
+        return [
+            'files.required' => 'El campo archivos es obligatorio.',
+            'files.*.file' => 'El campo archivos debe ser un archivo.',
+            'files.*.mimes' => 'El campo archivos debe ser un archivo XML.',
+        ];
     }
 }

@@ -11,6 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (Schema::hasTable(table: 'failed_jobs')) return; // El backup de datos no tiene la tabla pero antes de ello ejecuto el migrate para crearla, pero si ya existe no la vuelvo a crear
         Schema::create('failed_jobs', function (Blueprint $table) {
             $table->id();
             $table->string('uuid')->unique();

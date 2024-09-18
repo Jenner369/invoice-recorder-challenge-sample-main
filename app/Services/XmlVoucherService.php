@@ -1,9 +1,22 @@
 <?php
 namespace App\Services;
+use App\Contracts\IXmlVoucherService;
 use SimpleXMLElement;
 
-class XmlVoucherService
+class XmlVoucherService implements IXmlVoucherService
 {
+
+    /**
+     * Create an XML instance from a string content.
+     * @param string $xmlContent
+     * @return SimpleXMLElement
+     */
+    public function createXmlFromString(string $xmlContent): SimpleXMLElement
+    {
+        return new SimpleXMLElement($xmlContent);
+    }
+
+
     /**
      * Extracts the issuer, receiver, total amount and details from the XML content
      * @param SimpleXMLElement $xml
@@ -62,7 +75,8 @@ class XmlVoucherService
      * @param SimpleXMLElement $xml
      * @return array
      */
-    public function extractDetailsFromXmlContent(SimpleXMLElement $xml): array{  
+    public function extractDetailsFromXmlContent(SimpleXMLElement $xml): array
+    {  
         
         $id = (string) $xml->xpath('//cbc:ID')[0];
         [$series, $number] = explode('-', $id);

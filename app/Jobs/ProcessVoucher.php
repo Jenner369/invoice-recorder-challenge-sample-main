@@ -2,6 +2,7 @@
 
 namespace App\Jobs;
 
+use App\Contracts\Vouchers\IStoreVoucherService;
 use App\Events\Vouchers\VouchersProcessingResult;
 use App\Models\User;
 use App\Services\VoucherService;
@@ -31,9 +32,9 @@ class ProcessVoucher implements ShouldQueue
     /**
      * Execute the job.
      */
-    public function handle(VoucherService $voucherService): void
+    public function handle(IStoreVoucherService $storeVoucherService): void
     {
-        ['processed' => $vouchersProcessed, 'failed' => $vouchersFailed] = $voucherService->processVouchersFromFilesDataAndContent($this->vouchersForProcessing, $this->user);
+        ['processed' => $vouchersProcessed, 'failed' => $vouchersFailed] = $storeVoucherService->storeVouchersFromFilesDataAndContent($this->vouchersForProcessing, $this->user);
         
         event(new VouchersProcessingResult($vouchersProcessed, $vouchersFailed, $this->user));
     }

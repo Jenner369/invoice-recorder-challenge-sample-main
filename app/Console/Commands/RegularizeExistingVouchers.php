@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Contracts\IXmlVoucherService;
 use App\Models\Voucher;
 use App\Services\VoucherService;
 use App\Services\XmlVoucherService;
@@ -26,7 +27,7 @@ class RegularizeExistingVouchers extends Command
      */
     protected $description = 'Regularize existing vouchers adding missing fields like series, number, voucher_type and currency';
 
-    public function __construct(private readonly XmlVoucherService $xmlService)
+    public function __construct(private readonly IXmlVoucherService $xmlVoucherService)
     {
         parent::__construct();
     }
@@ -69,11 +70,11 @@ class RegularizeExistingVouchers extends Command
     private function regularizeVoucher($voucher)
     {
         try {
-            $xml = new SimpleXMLElement($voucher->xml_content);
-            $xmlData = $this->xmlService->extractDetailsFromXmlContent($xml);
+            $xml = $this->xmlVoucherService->createXmlFromString($voucher->xml_content);
+            $xmlData = $this->xmlVoucherService->extractDetailsFromXmlContent($xml);
             $voucher->update($xmlData);
             $this->info("Regularized invoice ID: {$voucher->id}");
-
+            
         } catch (\Exception $e) {
             Log::warning("Could not regularize invoice ID {$voucher->id}: " . $e->getMessage());
             $this->warn("Could not regularize invoice ID {$voucher->id}");

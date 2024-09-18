@@ -2,20 +2,24 @@
 
 namespace App\Services;
 
+use App\Contracts\ICurrencyService;
+use App\Contracts\IXmlVoucherService;
+use App\Contracts\Vouchers\IDeleteVoucherService;
+use App\Contracts\Vouchers\IGetVoucherService;
+use App\Contracts\Vouchers\IStoreVoucherService;
 use App\DTO\CurrencyTotalAmountDTO;
 use App\Events\Vouchers\VouchersCreated;
 use App\Models\User;
 use App\Models\Voucher;
 use App\Models\VoucherLine;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
-use SimpleXMLElement;
 
-class VoucherService
+class VoucherService implements IGetVoucherService, IDeleteVoucherService, IStoreVoucherService
 {
 
     public function __construct(
-        private readonly XmlVoucherService $xmlVoucherService,
-        private readonly CurrencyService $currencyService
+        private readonly IXmlVoucherService $xmlVoucherService,
+        private readonly ICurrencyService $currencyService
     ) {
     }
 
@@ -66,8 +70,7 @@ class VoucherService
 
     public function storeVoucherFromXmlContent(string $xmlContent, User $user): Voucher
     {
-        $xml = new SimpleXMLElement($xmlContent);
-
+        $xml = $this->xmlVoucherService->createXmlFromString($xmlContent);
         $data = $this->xmlVoucherService->getVoucherDataFromXml($xml);
         if (
             Voucher::duplicate(
@@ -121,7 +124,7 @@ class VoucherService
      * @param \App\Models\User $user
      * @return array
      */
-    public function processVouchersFromFilesDataAndContent(array $vouchersForProcessing, User $user): array
+    public function storeVouchersFromFilesDataAndContent(array $vouchersForProcessing, User $user): array
     {
         $processedVouchers = [];
         $failedVouchers = [];

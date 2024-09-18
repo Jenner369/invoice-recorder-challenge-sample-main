@@ -1,9 +1,10 @@
 <?php
 namespace App\Services;
+use App\Contracts\ICurrencyService;
 use Cache;
 use Http;
 
-class CurrencyService
+class CurrencyService implements ICurrencyService
 {
     protected $cacheExpiration;
     protected $currencyBase;

@@ -5,14 +5,13 @@ namespace App\Http\Controllers\Vouchers;
 use App\Http\Requests\Vouchers\StoreVoucherRequest;
 use App\Http\Resources\Vouchers\VoucherResource;
 use App\Jobs\ProcessVoucher;
-use App\Services\VoucherService;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
 class StoreVouchersHandler
 {
-    public function __construct(private readonly VoucherService $voucherService)
+    public function __construct()
     {
     }
 
@@ -24,7 +23,7 @@ class StoreVouchersHandler
         $vouchers = ProcessVoucher::dispatch($vouchersForProcessing, $user);
 
         return response([
-            'message' => 'Vouchers queued for processing',
+            'message' => "Los vouchers se están procesando. Recibirás una notificación cuando el procesamiento haya finalizado."
         ], 201);
     }
 }
