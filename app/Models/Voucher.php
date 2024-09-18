@@ -83,4 +83,10 @@ class Voucher extends Model
             ->where('number', $number)
             ->where('voucher_type', $voucherType);
     }        
+
+    public function scopeByUserId(Builder $query, string $userId): Builder
+    {
+        return $query->where('user_id', $userId);
+    }
+
 }

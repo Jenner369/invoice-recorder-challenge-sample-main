@@ -14,13 +14,30 @@ class VoucherService
 {
 
     public function __construct(
-        private readonly XmlVoucherService $xmlVoucherService
+        private readonly XmlVoucherService $xmlVoucherService,
+        private readonly CurrencyService $currencyService
     ) {
     }
 
     public function getVouchers(int $page, int $paginate): LengthAwarePaginator
     {
         return Voucher::with(['lines', 'user'])->paginate(perPage: $paginate, page: $page);
+    }
+
+    public function getTotalAmountVouchers(string $currency, User $user): CurrencyTotalAmountDTO
+    {
+        $totalAmountInBase = 0;
+        $totalAmountInCurrency = 0;
+
+        Voucher::query()->selectRaw('sum(total_amount) as total_amount, currency')
+            ->byUserId($user->id)
+            ->groupBy('currency', 'id')
+            ->each(function ($voucher) use (&$totalAmountInCurrency, &$totalAmountInBase, $currency) {
+                $totalAmountInCurrency += $this->currencyService->convertToCurrency($voucher->total_amount, $voucher->currency, $currency);
+                $totalAmountInBase += $this->currencyService->convertToBaseCurrency($voucher->total_amount, $voucher->currency);
+            });
+
+        return new CurrencyTotalAmountDTO($totalAmountInBase, $this->currencyService->getCurrencyBase(), $totalAmountInCurrency, $currency);
     }
 
     /**
