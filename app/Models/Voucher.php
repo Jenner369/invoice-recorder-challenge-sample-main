@@ -65,4 +65,22 @@ class Voucher extends Model
     {
         return $this->hasMany(VoucherLine::class);
     }
+
+    public function scopeDuplicate(
+        Builder $query, 
+        string $issuerDocumentNumber, 
+        string $issuer_document_type, 
+        string $totalAmount,
+        string $series,
+        string $number,
+        string $voucherType
+        ): Builder
+    {
+        return $query->where('issuer_document_number', $issuerDocumentNumber)
+            ->where('issuer_document_type', $issuer_document_type)
+            ->where('total_amount', $totalAmount)
+            ->where('series', $series)
+            ->where('number', $number)
+            ->where('voucher_type', $voucherType);
+    }        
 }

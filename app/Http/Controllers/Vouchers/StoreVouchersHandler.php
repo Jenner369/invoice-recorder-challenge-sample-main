@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\Vouchers;
 
+use App\Http\Requests\Vouchers\StoreVoucherRequest;
 use App\Http\Resources\Vouchers\VoucherResource;
+use App\Jobs\ProcessVoucher;
 use App\Services\VoucherService;
 use Exception;
 use Illuminate\Http\Request;
@@ -14,30 +16,15 @@ class StoreVouchersHandler
     {
     }
 
-    public function __invoke(Request $request): Response
+    public function __invoke(StoreVoucherRequest $request): Response
     {
-        try {
-            $xmlFiles = $request->file('files');
+        $vouchersForProcessing = $request->getFilesForProcessing();
 
-            if (!is_array($xmlFiles)) {
-                $xmlFiles = [$xmlFiles];
-            }
+        $user = auth()->user();
+        $vouchers = ProcessVoucher::dispatch($vouchersForProcessing, $user);
 
-            $xmlContents = [];
-            foreach ($xmlFiles as $xmlFile) {
-                $xmlContents[] = file_get_contents($xmlFile->getRealPath());
-            }
-
-            $user = auth()->user();
-            $vouchers = $this->voucherService->storeVouchersFromXmlContents($xmlContents, $user);
-
-            return response([
-                'data' => VoucherResource::collection($vouchers),
-            ], 201);
-        } catch (Exception $exception) {
-            return response([
-                'message' => $exception->getMessage(),
-            ], 400);
-        }
+        return response([
+            'message' => 'Vouchers queued for processing',
+        ], 201);
     }
 }
